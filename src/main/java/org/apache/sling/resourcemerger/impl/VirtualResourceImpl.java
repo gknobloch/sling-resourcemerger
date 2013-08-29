@@ -18,13 +18,17 @@
  */
 package org.apache.sling.resourcemerger.impl;
 
-import org.apache.sling.api.resource.*;
-import org.apache.sling.resourcemerger.api.VirtualResource;
-import org.apache.sling.resourcemerger.api.VirtualResourceConstants;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceMetadata;
+import org.apache.sling.api.resource.ResourceResolver;
+import org.apache.sling.api.resource.ResourceUtil;
+import org.apache.sling.api.resource.ValueMap;
+import org.apache.sling.resourcemerger.api.VirtualResource;
+import org.apache.sling.resourcemerger.api.VirtualResourceConstants;
 
 public class VirtualResourceImpl implements VirtualResource {
 
@@ -129,10 +133,9 @@ public class VirtualResourceImpl implements VirtualResource {
      * {@inheritDoc}
      */
     public ResourceMetadata getResourceMetadata() {
-        // Using the last mapped resource's metadata
-        return mappedResources.isEmpty()
-                ? null
-                : mappedResources.get(mappedResources.size() - 1).getResourceMetadata();
+        ResourceMetadata metadata = new ResourceMetadata();
+        metadata.put(ResourceMetadata.RESOLUTION_PATH, getPath());
+        return metadata;
     }
 
     /**
