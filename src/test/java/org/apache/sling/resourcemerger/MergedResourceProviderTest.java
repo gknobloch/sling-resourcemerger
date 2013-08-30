@@ -21,7 +21,7 @@ package org.apache.sling.resourcemerger;
 import org.apache.sling.commons.testing.jcr.RepositoryTestBase;
 import org.apache.sling.commons.testing.jcr.RepositoryUtil;
 
-public class VirtualResourceTest extends RepositoryTestBase {
+public class MergedResourceProviderTest extends RepositoryTestBase {
 
     @Override
     protected void setUp() throws Exception {
