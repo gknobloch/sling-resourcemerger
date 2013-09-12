@@ -18,46 +18,55 @@
  */
 package org.apache.sling.resourcemerger.impl;
 
-import org.apache.felix.scr.annotations.*;
+import java.util.Map;
+
+import org.apache.felix.scr.annotations.Activate;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceProvider;
 import org.apache.sling.api.resource.ResourceProviderFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-
-import java.util.Map;
+import org.apache.sling.resourcemerger.api.ResourceMergerService;
 
 @Component(metatype = false)
 @Service(value = ResourceProviderFactory.class)
 @Properties({
-        @Property(name = ResourceProvider.ROOTS, value = {"/virtual"}, propertyPrivate = true)
+        @Property(name = ResourceProvider.ROOTS, value = {"/merge"}, propertyPrivate = true)
 })
 /**
- * The <code>VirtualResourceProviderFactory</code> creates virtual resource
+ * The <code>MergedResourceProviderFactory</code> creates merged resource
  * providers.
  */
-public class VirtualResourceProviderFactory implements ResourceProviderFactory {
+public class MergedResourceProviderFactory implements ResourceProviderFactory {
 
-    private String virtualRootPath;
+    @Reference
+    private ResourceMergerService resourceMerger;
+
+    private String mergeRootPath;
 
     /**
      * {@inheritDoc}
      */
     public ResourceProvider getResourceProvider(Map<String, Object> stringObjectMap) throws LoginException {
-        return new VirtualResourceProvider(virtualRootPath);
+        return new MergedResourceProvider(resourceMerger, mergeRootPath);
     }
 
     /**
      * {@inheritDoc}
      */
     public ResourceProvider getAdministrativeResourceProvider(Map<String, Object> stringObjectMap) throws LoginException {
-        return new VirtualResourceProvider(virtualRootPath);
+        return new MergedResourceProvider(resourceMerger, mergeRootPath);
     }
 
     @Activate
     private void configure(Map<String, ?> properties) {
-        String[] virtualRootPaths = PropertiesUtil.toStringArray(properties.get(ResourceProvider.ROOTS), new String[0]);
-        if (virtualRootPaths.length > 0) {
-            virtualRootPath = virtualRootPaths[0];
+        String[] mergeRootPaths = PropertiesUtil.toStringArray(properties.get(ResourceProvider.ROOTS), new String[0]);
+        if (mergeRootPaths.length > 0) {
+            mergeRootPath = mergeRootPaths[0];
         }
     }
 

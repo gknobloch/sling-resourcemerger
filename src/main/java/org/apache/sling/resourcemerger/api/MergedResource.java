@@ -21,22 +21,29 @@ package org.apache.sling.resourcemerger.api;
 import org.apache.sling.api.resource.Resource;
 
 /**
- * Virtual resources are collections of physical {@link Resource} aggregated
+ * Merged resources are collections of physical {@link Resource}s aggregated
  * into one object.
  */
-public interface VirtualResource extends Resource {
+public interface MergedResource extends Resource {
 
     /**
-     * Adds a physical resource to the virtual resource
+     * Gets merged resource's relative path
      *
-     * @param resource The physical resource to add to the virtual resource
+     * @return The merged resource's relative path
+     */
+    public String getRelativePath();
+
+    /**
+     * Adds a physical resource to the merged resource
+     *
+     * @param resource The physical resource to add to the merged resource
      */
     public void addMappedResource(Resource resource);
 
     /**
-     * Returns an iterable of the physical resources mapped to the current virtual resource.
+     * Returns an iterable of the physical resources mapped to the current merged resource.
      *
-     * @return Iterable of the physical resources mapped to the current virtual resource.
+     * @return Iterable of the physical resources mapped to the current merged resource.
      */
     public Iterable<Resource> getMappedResources();
 

@@ -19,11 +19,11 @@
 package org.apache.sling.resourcemerger.api;
 
 /**
- * Constants related to {@link VirtualResource}.
+ * Constants related to {@link MergedResource}.
  */
-public class VirtualResourceConstants {
+public class MergedResourceConstants {
 
-    private VirtualResourceConstants() {
+    private MergedResourceConstants() {
         // Make sure it never gets instantiated
     }
 

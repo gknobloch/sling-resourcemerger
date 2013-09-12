@@ -27,26 +27,39 @@ import java.util.Set;
 
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.resourcemerger.api.VirtualResource;
-import org.apache.sling.resourcemerger.api.VirtualResourceConstants;
+import org.apache.sling.resourcemerger.api.MergedResource;
+import org.apache.sling.resourcemerger.api.MergedResourceConstants;
 
 /**
- * A <code>VirtualValueMap</code> is a {@link ValueMap} aggregated from the
- * different resources mapped to a {@link VirtualResource}.
+ * A <code>MergedValueMap</code> is a {@link ValueMap} aggregated from the
+ * different resources mapped to a {@link MergedResource}.
  */
-public class VirtualValueMap implements ValueMap {
+public class MergedValueMap implements ValueMap {
 
-    private Map<String, Object> properties = new LinkedHashMap<String, Object>();
-
+    /**
+     * Set of properties to exclude from override
+     */
     private static final Set<String> EXCLUDED_PROPERTIES = new HashSet<String>();
+
     static {
-        EXCLUDED_PROPERTIES.add(VirtualResourceConstants.PN_HIDE_PROPERTIES);
-        EXCLUDED_PROPERTIES.add(VirtualResourceConstants.PN_HIDE_RESOURCE);
-        EXCLUDED_PROPERTIES.add(VirtualResourceConstants.PN_HIDE_CHILDREN);
-        EXCLUDED_PROPERTIES.add(VirtualResourceConstants.PN_ORDER_BEFORE);
+        EXCLUDED_PROPERTIES.add(MergedResourceConstants.PN_HIDE_PROPERTIES);
+        EXCLUDED_PROPERTIES.add(MergedResourceConstants.PN_HIDE_RESOURCE);
+        EXCLUDED_PROPERTIES.add(MergedResourceConstants.PN_HIDE_CHILDREN);
+        EXCLUDED_PROPERTIES.add(MergedResourceConstants.PN_ORDER_BEFORE);
     }
 
-    public VirtualValueMap(VirtualResource resource) {
+    /**
+     * Final properties
+     */
+    private Map<String, Object> properties = new LinkedHashMap<String, Object>();
+
+    /**
+     * Constructor
+     *
+     * @param resource The merged resource to get properties from
+     */
+    public MergedValueMap(MergedResource resource) {
+        // Iterate over physical resources
         for (Resource r : resource.getMappedResources()) {
             ValueMap vm = r.adaptTo(ValueMap.class);
             if (properties.isEmpty()) {
@@ -61,9 +74,9 @@ public class VirtualValueMap implements ValueMap {
                 }
 
                 // Get properties to hide
-                String[] propertiesToHide = vm.get(VirtualResourceConstants.PN_HIDE_PROPERTIES, new String[0]);
+                String[] propertiesToHide = vm.get(MergedResourceConstants.PN_HIDE_PROPERTIES, new String[0]);
                 if (propertiesToHide.length == 0) {
-                    String propertyToHide = vm.get(VirtualResourceConstants.PN_HIDE_PROPERTIES, String.class);
+                    String propertyToHide = vm.get(MergedResourceConstants.PN_HIDE_PROPERTIES, String.class);
                     if (propertyToHide != null) {
                         propertiesToHide = new String[]{propertyToHide};
                     }

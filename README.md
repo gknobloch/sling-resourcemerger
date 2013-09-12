@@ -8,8 +8,8 @@ Proposed architecture
 
 The way we would like to solve those issues is:
 * Only put under /apps what's really needed
-* Use a virtual resource provider to request resources using /virtual/... instead of /apps/... or /libs/...
-* That virtual resource would be an aggregate of resources and properties from the corresponding search paths defined in the ResourceResolver
+* Use a merged resource provider to request resources using /merge/... instead of /apps/... or /libs/...
+* That merged resource would be an aggregate of resources and properties from the corresponding search paths defined in the ResourceResolver
 
 Magic properties
 ----------------
