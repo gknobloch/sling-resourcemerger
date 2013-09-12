@@ -91,7 +91,7 @@ public class MergedResourceImpl implements MergedResource {
      * {@inheritDoc}
      */
     public String getPath() {
-        return getMergeRootPath();
+        return ResourceUtil.normalize(mergeRootPath + "/" + relativePath);
     }
 
     /**
@@ -105,7 +105,7 @@ public class MergedResourceImpl implements MergedResource {
      * {@inheritDoc}
      */
     public Resource getParent() {
-        return getResourceResolver().getResource(ResourceUtil.getParent(getMergeRootPath()));
+        return getResourceResolver().getResource(ResourceUtil.getParent(getPath()));
     }
 
     /**
@@ -280,15 +280,6 @@ public class MergedResourceImpl implements MergedResource {
 
         Resource r = (Resource) o;
         return r.getPath().equals(getPath());
-    }
-
-    /**
-     * Gets the merged resource's path
-     *
-     * @return Merged resource's path
-     */
-    private String getMergeRootPath() {
-        return ResourceUtil.normalize(mergeRootPath + "/" + relativePath);
     }
 
 }
