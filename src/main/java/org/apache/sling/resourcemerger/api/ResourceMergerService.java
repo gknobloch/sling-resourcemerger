@@ -20,8 +20,21 @@ package org.apache.sling.resourcemerger.api;
 
 import org.apache.sling.api.resource.ResourceResolver;
 
+/**
+ * Service to merge multiple base paths into one single resource.
+ */
 public interface ResourceMergerService {
 
+    /**
+     * Gets a {@link MergedResource} from provided base paths, merge root path
+     * and relative path.
+     *
+     * @param resourceResolver The resource resolver
+     * @param basePaths        An array of base paths
+     * @param mergeRoot        The merge root path
+     * @param relativePath     The relative path to merge from base paths
+     * @return Returns the merged resource
+     */
     MergedResource merge(ResourceResolver resourceResolver, String[] basePaths, String mergeRoot, String relativePath);
 
 }
