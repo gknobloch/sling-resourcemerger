@@ -30,11 +30,11 @@ public interface ResourceMergerService {
      * and relative path.
      *
      * @param resourceResolver The resource resolver
+     * @param mergeRootPath    The merge root path
      * @param basePaths        An array of base paths
-     * @param mergeRoot        The merge root path
      * @param relativePath     The relative path to merge from base paths
      * @return Returns the merged resource
      */
-    MergedResource merge(ResourceResolver resourceResolver, String[] basePaths, String mergeRoot, String relativePath);
+    MergedResource merge(ResourceResolver resourceResolver, String mergeRootPath, String[] basePaths, String relativePath);
 
 }

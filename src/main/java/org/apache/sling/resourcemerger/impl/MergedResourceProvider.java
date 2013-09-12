@@ -54,7 +54,7 @@ public class MergedResourceProvider implements ResourceProvider {
      * {@inheritDoc}
      */
     public Resource getResource(ResourceResolver resolver, String path) {
-        return resourceMerger.merge(resolver, resolver.getSearchPath(), mergeRootPath, getRelativePath(path));
+        return resourceMerger.merge(resolver, mergeRootPath, resolver.getSearchPath(), getRelativePath(path));
     }
 
     /**

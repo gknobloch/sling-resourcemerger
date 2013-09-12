@@ -33,7 +33,7 @@ import org.apache.sling.resourcemerger.api.ResourceMergerService;
 @Service(value = ResourceMergerService.class)
 public class ResourceMergerServiceImpl implements ResourceMergerService {
 
-    public MergedResource merge(ResourceResolver resolver, String[] basePaths, String mergeRoot, String relativePath) {
+    public MergedResource merge(ResourceResolver resolver, String mergeRootPath, String[] basePaths, String relativePath) {
         List<Resource> mappedResources = new ArrayList<Resource>();
 
         if (basePaths != null) {
@@ -49,7 +49,7 @@ public class ResourceMergerServiceImpl implements ResourceMergerService {
 
             if (!mappedResources.isEmpty()) {
                 // Create a new merged resource based on the list of mapped physical resources
-                return new MergedResourceImpl(mergeRoot, relativePath, mappedResources);
+                return new MergedResourceImpl(mergeRootPath, relativePath, mappedResources);
             }
         }
 
