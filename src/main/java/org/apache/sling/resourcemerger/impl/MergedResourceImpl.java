@@ -45,7 +45,7 @@ public class MergedResourceImpl implements MergedResource {
      * @param mergeRootPath Merge root path
      * @param relativePath  Relative path
      */
-    MergedResourceImpl(String mergeRootPath, String relativePath) {
+    private MergedResourceImpl(String mergeRootPath, String relativePath) {
         this.mergeRootPath = mergeRootPath;
         this.relativePath = relativePath;
     }
