@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.sling.api.resource.AbstractResource;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
@@ -33,8 +34,9 @@ import org.apache.sling.resourcemerger.api.MergedResourceConstants;
 /**
  * {@inheritDoc}
  */
-public class MergedResourceImpl implements MergedResource {
+public class MergedResourceImpl extends AbstractResource implements MergedResource {
 
+    private final ResourceResolver resolver;
     private final String mergeRootPath;
     private final String relativePath;
     private final List<Resource> mappedResources = new ArrayList<Resource>();
@@ -42,10 +44,12 @@ public class MergedResourceImpl implements MergedResource {
     /**
      * Constructor
      *
+     * @param resolver      Resource resolver
      * @param mergeRootPath Merge root path
      * @param relativePath  Relative path
      */
-    private MergedResourceImpl(String mergeRootPath, String relativePath) {
+    private MergedResourceImpl(ResourceResolver resolver, String mergeRootPath, String relativePath) {
+        this.resolver = resolver;
         this.mergeRootPath = mergeRootPath;
         this.relativePath = relativePath;
     }
@@ -53,11 +57,13 @@ public class MergedResourceImpl implements MergedResource {
     /**
      * Constructor
      *
+     * @param resolver      Resource resolver
      * @param mergeRootPath   Merge root path
      * @param relativePath    Relative path
      * @param mappedResources List of physical mapped resources
      */
-    public MergedResourceImpl(String mergeRootPath, String relativePath, List<Resource> mappedResources) {
+    public MergedResourceImpl(ResourceResolver resolver, String mergeRootPath, String relativePath, List<Resource> mappedResources) {
+        this.resolver = resolver;
         this.mergeRootPath = mergeRootPath;
         this.relativePath = relativePath;
         this.mappedResources.addAll(mappedResources);
@@ -97,20 +103,6 @@ public class MergedResourceImpl implements MergedResource {
     /**
      * {@inheritDoc}
      */
-    public String getName() {
-        return ResourceUtil.getName(relativePath);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Resource getParent() {
-        return getResourceResolver().getResource(ResourceUtil.getParent(getPath()));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public Iterator<Resource> listChildren() {
         List<Resource> children = new ArrayList<Resource>();
 
@@ -127,11 +119,11 @@ public class MergedResourceImpl implements MergedResource {
 
                 if (child.adaptTo(ValueMap.class).get(MergedResourceConstants.PN_HIDE_RESOURCE, Boolean.FALSE)) {
                     // Child resource has to be hidden
-                    children.remove(new MergedResourceImpl(mergeRootPath, childRelativePath));
+                    children.remove(new MergedResourceImpl(resolver, mergeRootPath, childRelativePath));
 
                 } else {
                     // Check if the child resource already exists in the children list
-                    MergedResource mergedResChild = new MergedResourceImpl(mergeRootPath, childRelativePath);
+                    MergedResource mergedResChild = new MergedResourceImpl(resolver, mergeRootPath, childRelativePath);
                     int mergedResChildIndex = -1;
                     if (children.contains(mergedResChild)) {
                         // Get current index of the merged resource's child
@@ -147,7 +139,7 @@ public class MergedResourceImpl implements MergedResource {
                     String orderBefore = ResourceUtil.getValueMap(child).get(MergedResourceConstants.PN_ORDER_BEFORE, String.class);
                     if (orderBefore != null && !orderBefore.equals(mergedResChild.getName())) {
                         // Get a dummy merged resource just to know the index of that merged resource
-                        MergedResource orderBeforeRes = new MergedResourceImpl(mergeRootPath, getRelativePath() + "/" + orderBefore);
+                        MergedResource orderBeforeRes = new MergedResourceImpl(resolver, mergeRootPath, getRelativePath() + "/" + orderBefore);
                         if (children.contains(orderBeforeRes)) {
                             orderBeforeIndex = children.indexOf(orderBeforeRes);
                         }
@@ -173,24 +165,6 @@ public class MergedResourceImpl implements MergedResource {
     /**
      * {@inheritDoc}
      */
-    public Iterable<Resource> getChildren() {
-        return new Iterable<Resource>() {
-            public Iterator<Resource> iterator() {
-                return listChildren();
-            }
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Resource getChild(String relPath) {
-        return getResourceResolver().getResource(this, relPath);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public String getResourceType() {
         return relativePath;
     }
@@ -199,27 +173,8 @@ public class MergedResourceImpl implements MergedResource {
      * {@inheritDoc}
      */
     public String getResourceSuperType() {
-        // Using the last mapped resource's super type
-        // TODO: Loop and get value
-        // Problem for instance with JcrNodeResource, which returns <unset> instead of null.
-        // The same convention might not be applied for all implementations of the Resource API.
-        return mappedResources.isEmpty()
-                ? null
-                : mappedResources.get(mappedResources.size() - 1).getResourceSuperType();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isResourceType(String resourceType) {
-        // Looping over mapped resources to check if one of them is of the provided resource type
-        // TODO: just check against merged resource's resource type?
-        for (Resource mr : mappedResources) {
-            if (mr.isResourceType(resourceType)) {
-                return true;
-            }
-        }
-        return false;
+        // So far, there's no concept of resource super type for a merged resource
+        return null;
     }
 
     /**
@@ -235,10 +190,7 @@ public class MergedResourceImpl implements MergedResource {
      * {@inheritDoc}
      */
     public ResourceResolver getResourceResolver() {
-        // Using the last mapped resource's resource resolver
-        return mappedResources.isEmpty()
-                ? null
-                : mappedResources.get(mappedResources.size() - 1).getResourceResolver();
+        return resolver;
     }
 
     /**

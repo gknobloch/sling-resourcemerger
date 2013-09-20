@@ -49,7 +49,7 @@ public class ResourceMergerServiceImpl implements ResourceMergerService {
 
             if (!mappedResources.isEmpty()) {
                 // Create a new merged resource based on the list of mapped physical resources
-                return new MergedResourceImpl(mergeRootPath, relativePath, mappedResources);
+                return new MergedResourceImpl(resolver, mergeRootPath, relativePath, mappedResources);
             }
         }
 
