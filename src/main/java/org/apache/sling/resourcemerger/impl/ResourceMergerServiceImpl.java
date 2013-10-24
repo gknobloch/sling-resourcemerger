@@ -26,15 +26,14 @@ import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
-import org.apache.sling.resourcemerger.api.MergedResource;
 import org.apache.sling.resourcemerger.api.ResourceMergerService;
 
 @Component(metatype = false)
 @Service(value = ResourceMergerService.class)
 public class ResourceMergerServiceImpl implements ResourceMergerService {
 
-    public MergedResource merge(ResourceResolver resolver, String mergeRootPath, String[] basePaths, String relativePath) {
-        List<Resource> mappedResources = new ArrayList<Resource>();
+    public Resource merge(ResourceResolver resolver, String mergeRootPath, String[] basePaths, String relativePath) {
+        List<String> mappedResources = new ArrayList<String>();
 
         if (basePaths != null) {
             // Loop over provided base paths
@@ -43,13 +42,13 @@ public class ResourceMergerServiceImpl implements ResourceMergerService {
                 Resource baseRes = resolver.getResource(ResourceUtil.normalize(basePath + "/" + relativePath));
                 if (baseRes != null) {
                     // Physical resource exists, add it to the list of mapped resources
-                    mappedResources.add(0, baseRes);
+                    mappedResources.add(0, baseRes.getPath());
                 }
             }
 
             if (!mappedResources.isEmpty()) {
                 // Create a new merged resource based on the list of mapped physical resources
-                return new MergedResourceImpl(resolver, mergeRootPath, relativePath, mappedResources);
+                return new MergedResource(resolver, mergeRootPath, relativePath, mappedResources);
             }
         }
 

@@ -25,10 +25,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.sling.api.resource.Resource;
+import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.resourcemerger.api.MergedResource;
-import org.apache.sling.resourcemerger.api.MergedResourceConstants;
 
 /**
  * A <code>MergedValueMap</code> is a {@link ValueMap} aggregated from the
@@ -60,8 +58,8 @@ public class MergedValueMap implements ValueMap {
      */
     public MergedValueMap(MergedResource resource) {
         // Iterate over physical resources
-        for (Resource r : resource.getMappedResources()) {
-            ValueMap vm = r.adaptTo(ValueMap.class);
+        for (String r : resource.getMappedResources()) {
+            ValueMap vm = ResourceUtil.getValueMap(resource.getResourceResolver().getResource(r));
             if (properties.isEmpty()) {
                 // Add all properties
                 properties.putAll(vm);

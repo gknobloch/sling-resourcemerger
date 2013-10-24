@@ -28,18 +28,16 @@ import org.apache.sling.api.resource.ResourceMetadata;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.resourcemerger.api.MergedResource;
-import org.apache.sling.resourcemerger.api.MergedResourceConstants;
 
 /**
  * {@inheritDoc}
  */
-public class MergedResourceImpl extends AbstractResource implements MergedResource {
+public class MergedResource extends AbstractResource {
 
     private final ResourceResolver resolver;
     private final String mergeRootPath;
     private final String relativePath;
-    private final List<Resource> mappedResources = new ArrayList<Resource>();
+    private final List<String> mappedResources = new ArrayList<String>();
 
     /**
      * Constructor
@@ -48,7 +46,7 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
      * @param mergeRootPath Merge root path
      * @param relativePath  Relative path
      */
-    private MergedResourceImpl(ResourceResolver resolver, String mergeRootPath, String relativePath) {
+    private MergedResource(ResourceResolver resolver, String mergeRootPath, String relativePath) {
         this.resolver = resolver;
         this.mergeRootPath = mergeRootPath;
         this.relativePath = relativePath;
@@ -60,9 +58,9 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
      * @param resolver      Resource resolver
      * @param mergeRootPath   Merge root path
      * @param relativePath    Relative path
-     * @param mappedResources List of physical mapped resources
+     * @param mappedResources List of physical mapped resources' paths
      */
-    public MergedResourceImpl(ResourceResolver resolver, String mergeRootPath, String relativePath, List<Resource> mappedResources) {
+    public MergedResource(ResourceResolver resolver, String mergeRootPath, String relativePath, List<String> mappedResources) {
         this.resolver = resolver;
         this.mergeRootPath = mergeRootPath;
         this.relativePath = relativePath;
@@ -79,14 +77,14 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
     /**
      * {@inheritDoc}
      */
-    public void addMappedResource(Resource resource) {
-        mappedResources.add(resource);
+    public void addMappedResource(String path) {
+        mappedResources.add(path);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Iterable<Resource> getMappedResources() {
+    public Iterable<String> getMappedResources() {
         return mappedResources;
     }
 
@@ -106,7 +104,14 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
     public Iterator<Resource> listChildren() {
         List<Resource> children = new ArrayList<Resource>();
 
-        for (Resource mappedResource : mappedResources) {
+        for (String mappedResourcePath : mappedResources) {
+            Resource mappedResource = resolver.getResource(mappedResourcePath);
+
+            // Check if the resource exists
+            if (mappedResource == null) {
+                continue;
+            }
+
             // Check if previously defined children have to be ignored
             if (mappedResource.adaptTo(ValueMap.class).get(MergedResourceConstants.PN_HIDE_CHILDREN, Boolean.FALSE)) {
                 // Clear current children list
@@ -119,11 +124,11 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
 
                 if (child.adaptTo(ValueMap.class).get(MergedResourceConstants.PN_HIDE_RESOURCE, Boolean.FALSE)) {
                     // Child resource has to be hidden
-                    children.remove(new MergedResourceImpl(resolver, mergeRootPath, childRelativePath));
+                    children.remove(new MergedResource(resolver, mergeRootPath, childRelativePath));
 
                 } else {
                     // Check if the child resource already exists in the children list
-                    MergedResource mergedResChild = new MergedResourceImpl(resolver, mergeRootPath, childRelativePath);
+                    MergedResource mergedResChild = new MergedResource(resolver, mergeRootPath, childRelativePath);
                     int mergedResChildIndex = -1;
                     if (children.contains(mergedResChild)) {
                         // Get current index of the merged resource's child
@@ -131,7 +136,7 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
                         mergedResChild = (MergedResource) children.get(mergedResChildIndex);
                     }
                     // Add a new mapped resource to the merged resource
-                    mergedResChild.addMappedResource(child);
+                    mergedResChild.addMappedResource(child.getPath());
                     boolean mergedResChildExists = mergedResChildIndex > -1;
 
                     // Check if children need reordering
@@ -139,7 +144,7 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
                     String orderBefore = ResourceUtil.getValueMap(child).get(MergedResourceConstants.PN_ORDER_BEFORE, String.class);
                     if (orderBefore != null && !orderBefore.equals(mergedResChild.getName())) {
                         // Get a dummy merged resource just to know the index of that merged resource
-                        MergedResource orderBeforeRes = new MergedResourceImpl(resolver, mergeRootPath, getRelativePath() + "/" + orderBefore);
+                        MergedResource orderBeforeRes = new MergedResource(resolver, mergeRootPath, getRelativePath() + "/" + orderBefore);
                         if (children.contains(orderBeforeRes)) {
                             orderBeforeIndex = children.indexOf(orderBeforeRes);
                         }
@@ -183,6 +188,8 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
     public ResourceMetadata getResourceMetadata() {
         ResourceMetadata metadata = new ResourceMetadata();
         metadata.put(ResourceMetadata.RESOLUTION_PATH, getPath());
+        metadata.put("sling.mergedResource", true);
+        metadata.put("sling.mappedResources", mappedResources.toArray(new String[mappedResources.size()]));
         return metadata;
     }
 
@@ -198,7 +205,7 @@ public class MergedResourceImpl extends AbstractResource implements MergedResour
      */
     @SuppressWarnings("unchecked")
     public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-        if (type == MergedResource.class) {
+        if (type == Resource.class) {
             return (AdapterType) this;
 
         } else if (type == ValueMap.class) {

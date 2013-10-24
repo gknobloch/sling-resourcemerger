@@ -18,6 +18,7 @@
  */
 package org.apache.sling.resourcemerger.api;
 
+import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 /**
@@ -26,7 +27,7 @@ import org.apache.sling.api.resource.ResourceResolver;
 public interface ResourceMergerService {
 
     /**
-     * Gets a {@link MergedResource} from provided base paths, merge root path
+     * Gets a {@link Resource} from provided base paths, merge root path
      * and relative path.
      *
      * @param resourceResolver The resource resolver
@@ -35,6 +36,6 @@ public interface ResourceMergerService {
      * @param relativePath     The relative path to merge from base paths
      * @return Returns the merged resource
      */
-    MergedResource merge(ResourceResolver resourceResolver, String mergeRootPath, String[] basePaths, String relativePath);
+    Resource merge(ResourceResolver resourceResolver, String mergeRootPath, String[] basePaths, String relativePath);
 
 }

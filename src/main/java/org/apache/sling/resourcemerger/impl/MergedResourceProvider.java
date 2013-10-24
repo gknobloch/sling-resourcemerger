@@ -26,12 +26,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceProvider;
 import org.apache.sling.api.resource.ResourceResolver;
-import org.apache.sling.resourcemerger.api.MergedResource;
 import org.apache.sling.resourcemerger.api.ResourceMergerService;
 
 /**
  * The <code>MergedResourceProvider</code> is the resource provider providing
- * access to {@link org.apache.sling.resourcemerger.api.MergedResource} objects.
+ * access to {@link MergedResource} objects.
  */
 public class MergedResourceProvider implements ResourceProvider {
 
