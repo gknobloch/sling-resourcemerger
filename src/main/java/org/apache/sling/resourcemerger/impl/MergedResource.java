@@ -222,10 +222,7 @@ public class MergedResource extends AbstractResource {
      */
     @SuppressWarnings("unchecked")
     public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
-        if (type == Resource.class) {
-            return (AdapterType) this;
-
-        } else if (type == ValueMap.class) {
+        if (type == ValueMap.class) {
             return (AdapterType) new MergedValueMap(this);
         }
 
