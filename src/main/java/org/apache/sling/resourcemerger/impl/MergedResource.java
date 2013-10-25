@@ -19,6 +19,7 @@
 package org.apache.sling.resourcemerger.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -112,10 +113,26 @@ public class MergedResource extends AbstractResource {
                 continue;
             }
 
-            // Check if previously defined children have to be ignored
-            if (mappedResource.adaptTo(ValueMap.class).get(MergedResourceConstants.PN_HIDE_CHILDREN, Boolean.FALSE)) {
+            // Check if some previously defined children have to be ignored
+            ValueMap mappedResourceProps = mappedResource.adaptTo(ValueMap.class);
+            List<String> childrenToHide = Arrays.asList(mappedResourceProps.get(MergedResourceConstants.PN_HIDE_CHILDREN, new String[0]));
+            if (childrenToHide.isEmpty()) {
+                String childToHide = mappedResourceProps.get(MergedResourceConstants.PN_HIDE_CHILDREN, String.class);
+                if (childToHide != null) {
+                    childrenToHide.add(childToHide);
+                }
+            }
+            if (childrenToHide.contains("*")) {
                 // Clear current children list
                 children.clear();
+            } else {
+                // Go through current children in order to hide them individually
+                Iterator<Resource> it = children.iterator();
+                while (it.hasNext()) {
+                    if (childrenToHide.contains(it.next().getName())) {
+                        it.remove();
+                    }
+                }
             }
 
             // Browse children of current physical resource
