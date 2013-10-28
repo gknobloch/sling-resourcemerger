@@ -18,16 +18,25 @@
  */
 package org.apache.sling.resourcemerger.impl;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.apache.sling.api.adapter.AdapterFactory;
+import org.apache.sling.api.resource.ValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Component(metatype = false)
+@Service(AdapterFactory.class)
+@Properties({
+        @Property(name = "service.description", value = "Merged Resources Adapter")
+})
 public class MergedResourceAdapterFactory implements AdapterFactory {
 
     private static final Logger log = LoggerFactory.getLogger(MergedResourceAdapterFactory.class);
 
-    private static final Class<MergedValueMap> MERGED_VALUE_MAP_CLASS = MergedValueMap.class;
+    private static final Class<ValueMap> VALUE_MAP_CLASS = ValueMap.class;
 
     @Property(name = "adaptables")
     public static final String[] ADAPTABLE_CLASSES = {
@@ -36,7 +45,7 @@ public class MergedResourceAdapterFactory implements AdapterFactory {
 
     @Property(name = "adapters")
     public static final String[] ADAPTER_CLASSES = {
-            MERGED_VALUE_MAP_CLASS.getName(),
+            VALUE_MAP_CLASS.getName(),
     };
 
     public <AdapterType> AdapterType getAdapter(Object adaptable, Class<AdapterType> type) {
@@ -50,7 +59,7 @@ public class MergedResourceAdapterFactory implements AdapterFactory {
 
     @SuppressWarnings("unchecked")
     private <AdapterType> AdapterType getAdapter(MergedResource resource, Class<AdapterType> type) {
-        if (type == MERGED_VALUE_MAP_CLASS) {
+        if (type == VALUE_MAP_CLASS) {
             return (AdapterType) new MergedValueMap(resource);
         }
 
