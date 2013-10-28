@@ -39,8 +39,7 @@ public class MergedResourceConstants {
     public static final String PN_HIDE_RESOURCE = "sling:hideResource";
 
     /**
-     * Property name which has to be set to <code>true</code> to hide the
-     * children of the current resource.
+     * Property name containing the list of child resources to hide.
      */
     public static final String PN_HIDE_CHILDREN = "sling:hideChildren";
 
