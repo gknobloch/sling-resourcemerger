@@ -19,7 +19,6 @@
 package org.apache.sling.resourcemerger.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,7 +46,7 @@ public class MergedResource extends AbstractResource {
      * @param mergeRootPath Merge root path
      * @param relativePath  Relative path
      */
-    private MergedResource(ResourceResolver resolver, String mergeRootPath, String relativePath) {
+    MergedResource(ResourceResolver resolver, String mergeRootPath, String relativePath) {
         this.resolver = resolver;
         this.mergeRootPath = mergeRootPath;
         this.relativePath = relativePath;
@@ -61,7 +60,7 @@ public class MergedResource extends AbstractResource {
      * @param relativePath    Relative path
      * @param mappedResources List of physical mapped resources' paths
      */
-    public MergedResource(ResourceResolver resolver, String mergeRootPath, String relativePath, List<String> mappedResources) {
+    MergedResource(ResourceResolver resolver, String mergeRootPath, String relativePath, List<String> mappedResources) {
         this.resolver = resolver;
         this.mergeRootPath = mergeRootPath;
         this.relativePath = relativePath;
@@ -103,85 +102,7 @@ public class MergedResource extends AbstractResource {
      * {@inheritDoc}
      */
     public Iterator<Resource> listChildren() {
-        List<Resource> children = new ArrayList<Resource>();
-
-        for (String mappedResourcePath : mappedResources) {
-            Resource mappedResource = resolver.getResource(mappedResourcePath);
-
-            // Check if the resource exists
-            if (mappedResource == null) {
-                continue;
-            }
-
-            // Check if some previously defined children have to be ignored
-            ValueMap mappedResourceProps = mappedResource.adaptTo(ValueMap.class);
-            List<String> childrenToHide = Arrays.asList(mappedResourceProps.get(MergedResourceConstants.PN_HIDE_CHILDREN, new String[0]));
-            if (childrenToHide.isEmpty()) {
-                String childToHide = mappedResourceProps.get(MergedResourceConstants.PN_HIDE_CHILDREN, String.class);
-                if (childToHide != null) {
-                    childrenToHide.add(childToHide);
-                }
-            }
-            if (childrenToHide.contains("*")) {
-                // Clear current children list
-                children.clear();
-            } else {
-                // Go through current children in order to hide them individually
-                Iterator<Resource> it = children.iterator();
-                while (it.hasNext()) {
-                    if (childrenToHide.contains(it.next().getName())) {
-                        it.remove();
-                    }
-                }
-            }
-
-            // Browse children of current physical resource
-            for (Resource child : mappedResource.getChildren()) {
-                String childRelativePath = ResourceUtil.normalize(getRelativePath() + "/" + child.getName());
-
-                if (child.adaptTo(ValueMap.class).get(MergedResourceConstants.PN_HIDE_RESOURCE, Boolean.FALSE)) {
-                    // Child resource has to be hidden
-                    children.remove(new MergedResource(resolver, mergeRootPath, childRelativePath));
-
-                } else {
-                    // Check if the child resource already exists in the children list
-                    MergedResource mergedResChild = new MergedResource(resolver, mergeRootPath, childRelativePath);
-                    int mergedResChildIndex = -1;
-                    if (children.contains(mergedResChild)) {
-                        // Get current index of the merged resource's child
-                        mergedResChildIndex = children.indexOf(mergedResChild);
-                        mergedResChild = (MergedResource) children.get(mergedResChildIndex);
-                    }
-                    // Add a new mapped resource to the merged resource
-                    mergedResChild.addMappedResource(child.getPath());
-                    boolean mergedResChildExists = mergedResChildIndex > -1;
-
-                    // Check if children need reordering
-                    int orderBeforeIndex = -1;
-                    String orderBefore = ResourceUtil.getValueMap(child).get(MergedResourceConstants.PN_ORDER_BEFORE, String.class);
-                    if (orderBefore != null && !orderBefore.equals(mergedResChild.getName())) {
-                        // Get a dummy merged resource just to know the index of that merged resource
-                        MergedResource orderBeforeRes = new MergedResource(resolver, mergeRootPath, getRelativePath() + "/" + orderBefore);
-                        if (children.contains(orderBeforeRes)) {
-                            orderBeforeIndex = children.indexOf(orderBeforeRes);
-                        }
-                    }
-
-                    if (orderBeforeIndex > -1) {
-                        // Add merged resource's child at the right position
-                        children.add(orderBeforeIndex, mergedResChild);
-                        if (mergedResChildExists) {
-                            children.remove(mergedResChildIndex > orderBeforeIndex ? ++mergedResChildIndex : mergedResChildIndex);
-                        }
-                    } else if (!mergedResChildExists) {
-                        // Only add the merged resource's child if it did not exist yet
-                        children.add(mergedResChild);
-                    }
-                }
-            }
-        }
-
-        return children.iterator();
+        return resolver.listChildren(this);
     }
 
     /**
