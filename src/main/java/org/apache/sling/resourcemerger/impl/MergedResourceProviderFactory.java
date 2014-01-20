@@ -30,7 +30,6 @@ import org.apache.sling.api.resource.LoginException;
 import org.apache.sling.api.resource.ResourceProvider;
 import org.apache.sling.api.resource.ResourceProviderFactory;
 import org.apache.sling.commons.osgi.PropertiesUtil;
-import org.apache.sling.resourcemerger.api.ResourceMergerService;
 
 @Component(metatype = false)
 @Service(value = ResourceProviderFactory.class)
@@ -43,23 +42,20 @@ import org.apache.sling.resourcemerger.api.ResourceMergerService;
  */
 public class MergedResourceProviderFactory implements ResourceProviderFactory {
 
-    @Reference
-    private ResourceMergerService resourceMerger;
-
     private String mergeRootPath;
 
     /**
      * {@inheritDoc}
      */
     public ResourceProvider getResourceProvider(Map<String, Object> stringObjectMap) throws LoginException {
-        return new MergedResourceProvider(resourceMerger, mergeRootPath);
+        return new MergedResourceProvider(mergeRootPath);
     }
 
     /**
      * {@inheritDoc}
      */
     public ResourceProvider getAdministrativeResourceProvider(Map<String, Object> stringObjectMap) throws LoginException {
-        return new MergedResourceProvider(resourceMerger, mergeRootPath);
+        return new MergedResourceProvider(mergeRootPath);
     }
 
     @Activate

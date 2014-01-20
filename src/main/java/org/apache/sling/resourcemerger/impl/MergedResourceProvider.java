@@ -31,7 +31,6 @@ import org.apache.sling.api.resource.ResourceProvider;
 import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.api.resource.ResourceUtil;
 import org.apache.sling.api.resource.ValueMap;
-import org.apache.sling.resourcemerger.api.ResourceMergerService;
 
 /**
  * The <code>MergedResourceProvider</code> is the resource provider providing
@@ -40,10 +39,8 @@ import org.apache.sling.resourcemerger.api.ResourceMergerService;
 public class MergedResourceProvider implements ResourceProvider {
 
     private final String mergeRootPath;
-    private ResourceMergerService resourceMerger;
 
-    public MergedResourceProvider(ResourceMergerService resourceMerger, String mergeRootPath) {
-        this.resourceMerger = resourceMerger;
+    public MergedResourceProvider(String mergeRootPath) {
         this.mergeRootPath = mergeRootPath;
     }
 
@@ -58,7 +55,29 @@ public class MergedResourceProvider implements ResourceProvider {
      * {@inheritDoc}
      */
     public Resource getResource(ResourceResolver resolver, String path) {
-        return resourceMerger.merge(resolver, mergeRootPath, resolver.getSearchPath(), getRelativePath(path));
+        List<String> mappedResources = new ArrayList<String>();
+
+        if (resolver.getSearchPath() != null) {
+            String relativePath = getRelativePath(path);
+
+            // Loop over provided base paths
+            for (String basePath : resolver.getSearchPath()) {
+                // Try to get the corresponding physical resource for this base path
+                Resource baseRes = resolver.getResource(ResourceUtil.normalize(basePath + "/" + relativePath));
+                if (baseRes != null) {
+                    // Physical resource exists, add it to the list of mapped resources
+                    mappedResources.add(0, baseRes.getPath());
+                }
+            }
+
+            if (!mappedResources.isEmpty()) {
+                // Create a new merged resource based on the list of mapped physical resources
+                return new MergedResource(resolver, mergeRootPath, relativePath, mappedResources);
+            }
+        }
+
+        // Either base paths were not defined, or the resource does not exist in any of them
+        return null;
     }
 
     /**
