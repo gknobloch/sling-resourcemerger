@@ -218,6 +218,19 @@ public class MergedResource extends AbstractResource {
     }
 
 
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("unchecked")
+    public <AdapterType> AdapterType adaptTo(Class<AdapterType> type) {
+        if (type == ValueMap.class) {
+            return (AdapterType) new MergedValueMap(this);
+        }
+
+        return null;
+    }
+
+
     // ---- Object ------------------------------------------------------------
 
     /**
